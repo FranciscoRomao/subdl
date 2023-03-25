@@ -398,10 +398,11 @@ def parseargs(args):
     parser.add_argument("--imdb-id", help="IMDB ID", metavar="ID")
     parser.add_argument("--force-imdb", help="Force IMDB ID", action="store_true")
     parser.add_argument("--output", help="Output filename format")
+    choices=["abort", "bypass", "overwrite", "query"]
     parser.add_argument(
         "--existing",
-        help="Action to take if subtitle already exists",
-        choices=["abort", "bypass", "overwrite", "query"],
+        help=f"Action to take if subtitle already exists.\nValues: {', '.join(choices)}",
+        choices=choices,
         default="abort",
         metavar="ACTION",
     )
