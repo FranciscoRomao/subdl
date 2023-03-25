@@ -378,13 +378,21 @@ def parseargs(args):
         "--list-languages", help="List languages and exit", action="store_true"
     )
     parser.add_argument(
-        "--username", dest="osdb_username", help="OSDB username", default=""
+        "--username",
+        dest="osdb_username",
+        help="OSDB username",
+        default="",
+        metavar="USER",
     )
     parser.add_argument(
-        "--password", dest="osdb_password", help="OSDB password", default=""
+        "--password",
+        dest="osdb_password",
+        help="OSDB password",
+        default="",
+        metavar="PASS",
     )
     parser.add_argument("--search", help="Search for subtitles")
-    parser.add_argument("--imdb-id", help="IMDB ID")
+    parser.add_argument("--imdb-id", help="IMDB ID", metavar="ID")
     parser.add_argument("--force-imdb", help="Force IMDB ID", action="store_true")
     parser.add_argument("--output", help="Output filename format")
     parser.add_argument(
@@ -392,15 +400,22 @@ def parseargs(args):
         help="Action to take if subtitle already exists",
         choices=["abort", "bypass", "overwrite", "query"],
         default="abort",
+        metavar="ACTION",
     )
     parser.add_argument("--interactive", help="Interactive mode", action="store_true")
     parser.add_argument("--utf8", help="Convert subtitles to utf8", action="store_true")
     parser.add_argument(
         "--filter", help="Filter subtitles for text", action="store_true"
     )
-    parser.add_argument("--download", help="Download subtitles", default="first")
     parser.add_argument(
-        "--lang", help="Subtitle language", choices=accepted_languages, default="eng"
+        "--download", help="Download subtitles", default="first", metavar="SPEC"
+    )
+    parser.add_argument(
+        "--lang",
+        help="Subtitle language",
+        choices=accepted_languages,
+        default="eng",
+        metavar="LANG",
     )
     parser.add_argument(
         "-n", help="Display search results and exit", action="store_true"
