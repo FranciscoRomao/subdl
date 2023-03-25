@@ -421,7 +421,7 @@ def parseargs(args):
         "-n", help="Display search results and exit", action="store_true"
     )
     parser.add_argument("--force-filename", help="Force filename", action="store_true")
-    parser.add_argument("files", nargs="+", help="Video files")
+    parser.add_argument("files", nargs="*", help="Video files")
 
     parser.add_argument("-path", required=False, default="results/")
 
