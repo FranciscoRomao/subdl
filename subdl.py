@@ -441,7 +441,8 @@ def parseargs(args):
 
     if options.n or options.download == "none":
         options.download = "none"
-    elif options.interactive:
+
+    if options.interactive:
         options.download = "query"
         options.existing = "query"
 
