@@ -372,7 +372,7 @@ def parseargs(args):
 
     parser.add_argument("--version", help="Print version and exit", action="store_true")
     parser.add_argument(
-        "--versionx", help="Print versionx and exit", action="store_true"
+        "--versionx", help="Print version only and exit", action="store_true"
     )
     parser.add_argument(
         "--list-languages", help="List languages and exit", action="store_true"
