@@ -4,53 +4,6 @@
 #
 # Uses code from subdownloader (a GUI app).
 
-__doc__ = """\
-Syntax: subdl [options] moviefile.avi ...
-
-Subdl is a command-line tool for downloading subtitles from opensubtitles.org.
-
-By default, it will search for English subtitles, display the results,
-download the highest-rated result in the requested language and save it to the
-appropriate filename.
-
-Options:
-  --help                     This text
-  --version                  Print version and exit
-  --lang=LANGUAGES           Comma-separated list of languages in 3-letter code, e.g.
-                             'eng,spa,fre', or 'all' for all.  Default is 'eng'.
-  --list-languages           List available languages and exit.
-  --username                 opensubtitles.org username
-  --password                 opensubtitles.org password
-  --search                   Use search string to look for subtitles.
-  --download=ID              Download a particular subtitle by numeric ID.
-  --download=first           Download the first search result [default].
-  --download=all             Download all search results.
-  --download=best-rating     Download the result with best rating.
-  --download=most-downloaded Download the most downloaded result.
-  --download=query           Query which search result to download.
-  --download=none, -n        Display search results and exit.
-  --output=OUTPUT            Output to specified output filename.  Can include the
-                             following format specifiers:
-                             {I} subtitle id
-                             {m} movie file base     {M} movie file extension
-                             {s} subtitle file base  {S} subtitle file extension
-                             {l} language (English)  {L} language (2-letter ISO639)
-                             Default is "{m}.{S}"; if multiple languages are searched,
-                             then the default is "{m}.{L}.{S}"; if --download=all, then
-                             the default is "{m}.{L}.{I}.{S}".
-  --existing=abort           Abort if output filename already exists [default].
-  --existing=bypass          Exit gracefully if output filename already exists.
-  --existing=overwrite       Overwrite if output filename already exists.
-  --existing=query           Query whether to overwrite.
-  --imdb-id=id               Query by IMDB id. Hash is tried first unless --force-imdb
-                             is used. IMDB URLs are also accepted.
-  --force-imdb               Force IMDB search. --imdb-id must be specified.
-  --force-filename           Force search using filename.
-  --filter                   Filter blacklisted texts from subtitle.
-  --interactive, -i          Equivalent to --download=query --existing=query.
-  --utf8                     Convert output to UTF-8 encoding (Unicode).
-  """
-
 NAME = "subdl"
 VERSION = "1.1.2"
 
@@ -65,8 +18,9 @@ import os, sys
 import struct
 import xmlrpc.client
 import io, gzip, base64
-import getopt
 import re
+import argparse
+import pdb
 
 OSDB_SERVER_URI = "https://api.opensubtitles.org/xml-rpc"
 xmlrpc_server = None
@@ -92,24 +46,7 @@ BLACKLIST = [
     "^- _$",
 ]
 
-
-class Options:
-    pass
-
-
-options = Options()
-options.lang = "eng"
-options.download = "first"
-options.output = None
-options.existing = "abort"
-options.imdb_id = None
-options.force_imdb = False
-options.force_filename = False
-options.filter = False
-options.osdb_username = ""
-options.osdb_password = ""
-options.search = ""
-options.utf8 = False
+global options
 
 
 class SubtitleSearchResult:
@@ -391,7 +328,6 @@ def select_search_result_by_id(id, search_results):
 
 def help():
     print(__doc__)
-    raise SystemExit
 
 
 def isnumber(value):
@@ -403,18 +339,9 @@ def isnumber(value):
 
 def ListLanguages():
     languages = xmlrpc_server.GetSubLanguages("")["data"]
+    print("Available languages:")
     for language in languages:
         print(language["SubLanguageID"], language["ISO639"], language["LanguageName"])
-    raise SystemExit
-
-
-def default_output_fmt():
-    if options.download == "all":
-        return "{m}.{L}.{I}.{S}"
-    elif options.lang == "all" or "," in options.lang:
-        return "{m}.{L}.{S}"
-    else:
-        return "{m}.{S}"
 
 
 def osdb_connect():
@@ -429,113 +356,118 @@ def osdb_connect():
 
 
 def parseargs(args):
-    try:
-        opts, arguments = getopt.getopt(
-            args,
-            "h?in",
-            [
-                "existing=",
-                "lang=",
-                "search-only=",
-                "download=",
-                "output=",
-                "interactive",
-                "utf8",
-                "list-languages",
-                "imdb-id=",
-                "force-imdb",
-                "force-filename",
-                "filter",
-                "help",
-                "version",
-                "versionx",
-                "username=",
-                "password=",
-                "search=",
-            ],
+
+    global options
+
+    parser = argparse.ArgumentParser(
+        description="Subdl - command-line tool to download subtitles from opensubtitles.org",
+        add_help=True,
+    )
+
+    with open("languages.txt") as f:
+        accepted_languages = []
+        languages = f.read().splitlines()
+        for language in languages:
+            accepted_languages += language.split(" ")
+
+    parser.add_argument("--version", help="Print version and exit", action="store_true")
+    parser.add_argument(
+        "--versionx", help="Print versionx and exit", action="store_true"
+    )
+    parser.add_argument(
+        "--list-languages", help="List languages and exit", action="store_true"
+    )
+    parser.add_argument(
+        "--username", dest="osdb_username", help="OSDB username", default=""
+    )
+    parser.add_argument(
+        "--password", dest="osdb_password", help="OSDB password", default=""
+    )
+    parser.add_argument("--search", help="Search for subtitles")
+    parser.add_argument("--imdb-id", help="IMDB ID")
+    parser.add_argument("--force-imdb", help="Force IMDB ID", action="store_true")
+    parser.add_argument("--output", help="Output filename format")
+    parser.add_argument(
+        "--existing",
+        help="Action to take if subtitle already exists",
+        choices=["abort", "bypass", "overwrite", "query"],
+        default="abort",
+    )
+    parser.add_argument("--interactive", help="Interactive mode", action="store_true")
+    parser.add_argument("--utf8", help="Convert subtitles to utf8", action="store_true")
+    parser.add_argument(
+        "--filter", help="Filter subtitles for text", action="store_true"
+    )
+    parser.add_argument("--download", help="Download subtitles", default="first")
+    parser.add_argument(
+        "--lang", help="Subtitle language", choices=accepted_languages, default="eng"
+    )
+    parser.add_argument(
+        "-n", help="Display search results and exit", action="store_true"
+    )
+    parser.add_argument("--force-filename", help="Force filename", action="store_true")
+    parser.add_argument("files", nargs="+")
+
+    parser.add_argument("-path", required=False, default="results/")
+    options = parser.parse_args()
+
+    # The following are mutual exclusive options that change the normal behaviour of the script
+
+    if options.versionx:
+        print(VERSION)
+        raise SystemExit
+
+    if options.version:
+        print("%s %s" % (NAME, VERSION))
+        raise SystemExit
+    elif options.list_languages:
+        ListLanguages()
+        raise SystemExit
+    elif options.n or options.download == "none":
+        options.download = "none"
+    elif options.interactive:
+        options.download = "query"
+        options.existing = "query"
+
+    if options.download not in [
+        "all",
+        "first",
+        "query",
+        "none",
+        "best-rating",
+        "most-downloaded",
+    ] and not isnumber(options.download):
+        raise SystemExit(
+            "Argument to --download must be numeric subtitle id or one: all, first, query, none"
         )
-    except getopt.GetoptError as e:
-        raise SystemExit("%s: %s (see --help)" % (sys.argv[0], e))
-    for option, value in opts:
-        if option == "--help" or option == "-h" or option == "-?":
-            help()
-        elif option == "--versionx":
-            print(VERSION)
-            raise SystemExit
-        elif option == "--version":
-            print("%s %s" % (NAME, VERSION))
-            raise SystemExit
-        elif option == "--existing":
-            if value in ["abort", "overwrite", "bypass", "query"]:
-                pass
-            else:
-                raise SystemExit(
-                    "Argument to --existing must be one of: abort, overwrite, bypass, query"
-                )
-            options.existing = value
-        elif option == "--lang":
-            options.lang = value
-        elif option == "--download":
-            if value in [
-                "all",
-                "first",
-                "query",
-                "none",
-                "best-rating",
-                "most-downloaded",
-            ] or isnumber(value):
-                pass
-            else:
-                raise SystemExit(
-                    "Argument to --download must be numeric subtitle id or one: all, first, query, none"
-                )
-            options.download = value
-        elif option == "--username":
-            options.osdb_username = value
-        elif option == "--password":
-            options.osdb_password = value
-        elif option == "--search":
-            options.search = value
-        elif option == "-n":
-            options.download = "none"
-        elif option == "--output":
-            options.output = value
-        elif option == "--imdb-id":
-            options.imdb_id = value
-        elif option == "--force-imdb":
-            options.force_imdb = True
-        elif option == "--force-filename":
-            options.force_filename = True
-        elif option == "--filter":
-            options.filter = True
-        elif option == "--interactive" or option == "-i":
-            options.download = "query"
-            options.existing = "query"
-        elif option == "--utf8":
-            options.utf8 = True
-            try:
-                import chardet
-            except ModuleNotFoundError:
-                sys.stderr.write(
-                    "Error: The --utf8 option requires the chardet module from https://pypi.org/project/chardet/ - Hint: pip install chardet\n"
-                )
-                sys.exit(1)
-        elif option == "--list-languages":
-            ListLanguages()
-        else:
-            raise SystemExit("internal error: bad option '%s'" % option)
+
     if not options.output:
         options.output = default_output_fmt()
-    if len(arguments) == 0:
-        raise SystemExit(
-            "syntax: %s [options] filename.avi (see --help)" % (sys.argv[0])
-        )
-    if len(arguments) > 1 and options.force_imdb:
+
+    if options.utf8:
+        try:
+            import chardet
+        except ModuleNotFoundError:
+            sys.stderr.write(
+                "Error: The --utf8 option requires the chardet module from https://pypi.org/project/chardet/ - Hint: pip install chardet\n"
+            )
+            raise SystemExit
+
+    if len(options.files) > 1 and options.force_imdb:
         raise SystemExit("Can't use --force-imdb with multiple files.")
-    if len(arguments) > 1 and isnumber(options.download):
+    if len(options.files) > 1 and isnumber(options.download):
         raise SystemExit("Can't use --download=ID with multiple files.")
 
-    return arguments
+    return options.files
+
+
+def default_output_fmt():
+    if options.download == "all":
+        return "{m}.{L}.{I}.{S}"
+    elif options.lang == "all" or "," in options.lang:
+        return "{m}.{L}.{S}"
+    else:
+        return "{m}.{S}"
 
 
 def main(args):
