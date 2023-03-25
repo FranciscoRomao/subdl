@@ -364,6 +364,7 @@ def parseargs(args):
     parser = argparse.ArgumentParser(
         description="Subdl - command-line tool to download subtitles from opensubtitles.org",
         add_help=True,
+        epilog=VERSION_INFO,
     )
 
     with open("languages.txt") as f:
