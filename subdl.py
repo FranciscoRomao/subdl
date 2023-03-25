@@ -26,6 +26,7 @@ OSDB_SERVER_URI = "https://api.opensubtitles.org/xml-rpc"
 xmlrpc_server = None
 login = None
 osdb_token = None
+options = None
 
 BLACKLIST = [
     "opensubtitles",
@@ -45,8 +46,6 @@ BLACKLIST = [
     "^_$",
     "^- _$",
 ]
-
-global options
 
 
 def fatal_error(message):
@@ -361,9 +360,6 @@ def osdb_connect():
 
 
 def parseargs(args):
-
-    global options
-
     parser = argparse.ArgumentParser(
         description="Subdl - command-line tool to download subtitles from opensubtitles.org",
         add_help=True,
@@ -488,7 +484,7 @@ def parseargs(args):
     if len(options.files) > 1 and isnumber(options.download):
         raise SystemExit("Can't use --download=ID with multiple files.")
 
-    return options.files
+    return options
 
 
 def default_output_fmt():
@@ -501,11 +497,15 @@ def default_output_fmt():
 
 
 def main(args):
-    files = parseargs(args)
+
+    global options
+
+    options = parseargs(args)
+
     osdb_connect()
 
     no_search_results = 0
-    for file in files:
+    for file in options.files:
         selected_file = ""
         file_name = file_base(os.path.basename(file))
 
