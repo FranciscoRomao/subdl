@@ -493,7 +493,10 @@ def parseargs(args):
         raise SystemExit
 
     if options.list_languages:
-        ListLanguages()
+        # FIXME AttributeError: 'NoneType' object has no attribute 'GetSubLanguages'
+        #ListLanguages()
+        for langs in LANGUAGES:
+            print(" ".join(langs))
         raise SystemExit
 
     if options.n or options.download == "none":
