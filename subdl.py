@@ -365,6 +365,7 @@ def parseargs(args):
         description="Subdl - command-line tool to download subtitles from opensubtitles.org",
         add_help=True,
         epilog=VERSION_INFO,
+        formatter_class=argparse.RawTextHelpFormatter,
     )
 
     with open("languages.txt") as f:
