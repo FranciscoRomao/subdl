@@ -472,10 +472,9 @@ def parseargs(args):
         try:
             import chardet
         except ModuleNotFoundError:
-            sys.stderr.write(
-                "Error: The --utf8 option requires the chardet module from https://pypi.org/project/chardet/ - Hint: pip install chardet\n"
+            fatal_error(
+                "The --utf8 option requires the chardet module from https://pypi.org/project/chardet/ - Hint: pip install chardet"
             )
-            raise SystemExit
 
     if len(options.files) == 0:
         fatal_error("The following arguments are required: files")
