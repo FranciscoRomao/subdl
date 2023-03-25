@@ -12,7 +12,8 @@ VERSION_INFO = """\
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-http://code.google.com/p/subdl/"""
+https://github.com/alexanderwink/subdl
+"""
 
 import os, sys
 import struct
