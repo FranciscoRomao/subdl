@@ -416,7 +416,7 @@ def parseargs(args):
     )
     parser.add_argument(
         "--lang",
-        help="Subtitle language",
+        help="Subtitle language. Values: See --list-languages",
         choices=accepted_languages,
         default="eng",
         metavar="LANG",
