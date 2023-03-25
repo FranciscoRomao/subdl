@@ -49,6 +49,11 @@ BLACKLIST = [
 global options
 
 
+def fatal_error(message):
+    sys.stderr.write(f"Error: {message}\n")
+    sys.exit(1)
+
+
 class SubtitleSearchResult:
     def __init__(self, dict):
         self.__dict__ = dict
@@ -473,6 +478,9 @@ def parseargs(args):
                 "Error: The --utf8 option requires the chardet module from https://pypi.org/project/chardet/ - Hint: pip install chardet\n"
             )
             raise SystemExit
+
+    if len(options.files) == 0:
+        fatal_error("The following arguments are required: files")
 
     if len(options.files) > 1 and options.force_imdb:
         raise SystemExit("Can't use --force-imdb with multiple files.")
