@@ -409,9 +409,8 @@ def parseargs(args):
     parser.add_argument("files", nargs="+")
 
     parser.add_argument("-path", required=False, default="results/")
-    options = parser.parse_args()
 
-    # The following are mutual exclusive options that change the normal behaviour of the script
+    options = parser.parse_args()
 
     if options.versionx:
         print(VERSION)
@@ -420,10 +419,12 @@ def parseargs(args):
     if options.version:
         print("%s %s" % (NAME, VERSION))
         raise SystemExit
-    elif options.list_languages:
+
+    if options.list_languages:
         ListLanguages()
         raise SystemExit
-    elif options.n or options.download == "none":
+
+    if options.n or options.download == "none":
         options.download = "none"
     elif options.interactive:
         options.download = "query"
@@ -459,6 +460,7 @@ def parseargs(args):
 
     if len(options.files) > 1 and options.force_imdb:
         raise SystemExit("Can't use --force-imdb with multiple files.")
+
     if len(options.files) > 1 and isnumber(options.download):
         raise SystemExit("Can't use --download=ID with multiple files.")
 
