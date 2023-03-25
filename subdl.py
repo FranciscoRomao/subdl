@@ -429,14 +429,18 @@ def parseargs(args):
         options.download = "query"
         options.existing = "query"
 
-    if options.download not in [
-        "all",
-        "first",
-        "query",
-        "none",
-        "best-rating",
-        "most-downloaded",
-    ] and not isnumber(options.download):
+    if (
+        options.download
+        not in [
+            "all",
+            "first",
+            "query",
+            "none",
+            "best-rating",
+            "most-downloaded",
+        ]
+        and not isnumber(options.download)
+    ):
         raise SystemExit(
             "Argument to --download must be numeric subtitle id or one: all, first, query, none"
         )
