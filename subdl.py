@@ -49,6 +49,60 @@ BLACKLIST = [
 ]
 
 
+LANGUAGES = [
+    ["alb", "sq", "Albanian"],
+    ["ara", "ar", "Arabic"],
+    ["arm", "hy", "Armenian"],
+    ["ass", "ay", "Assyrian"],
+    ["bos", "bs", "Bosnian"],
+    ["pob", "pb", "Portuguese-BR"],
+    ["bul", "bg", "Bulgarian"],
+    ["cat", "ca", "Catalan"],
+    ["chi", "zh", "Chinese"],
+    ["hrv", "hr", "Croatian"],
+    ["cze", "cs", "Czech"],
+    ["dan", "da", "Danish"],
+    ["dut", "nl", "Dutch"],
+    ["eng", "en", "English"],
+    ["est", "et", "Estonian"],
+    ["fin", "fi", "Finnish"],
+    ["fre", "fr", "French"],
+    ["glg", "gl", "Galician"],
+    ["geo", "ka", "Georgian"],
+    ["ger", "de", "German"],
+    ["ell", "gr", "Greek"],
+    ["heb", "he", "Hebrew"],
+    ["hin", "hi", "Hindi"],
+    ["hun", "hu", "Hungarian"],
+    ["ice", "is", "Icelandic"],
+    ["ind", "id", "Indonesian"],
+    ["ita", "it", "Italian"],
+    ["jpn", "ja", "Japanese"],
+    ["kaz", "kk", "Kazakh"],
+    ["kor", "ko", "Korean"],
+    ["lav", "lv", "Latvian"],
+    ["lit", "lt", "Lithuanian"],
+    ["ltz", "lb", "Luxembourgish"],
+    ["mac", "mk", "Macedonian"],
+    ["may", "ms", "Malay"],
+    ["nor", "no", "Norwegian"],
+    ["per", "fa", "Farsi"],
+    ["pol", "pl", "Polish"],
+    ["por", "pt", "Portuguese"],
+    ["rum", "ro", "Romanian"],
+    ["rus", "ru", "Russian"],
+    ["scc", "sr", "Serbian"],
+    ["slo", "sk", "Slovak"],
+    ["slv", "sl", "Slovenian"],
+    ["spa", "es", "Spanish"],
+    ["swe", "sv", "Swedish"],
+    ["tha", "th", "Thai"],
+    ["tur", "tr", "Turkish"],
+    ["ukr", "uk", "Ukrainian"],
+    ["vie", "vi", "Vietnamese"],
+]
+
+
 def fatal_error(message, code=1):
     sys.stderr.write(f"Error: {message}\n")
     sys.exit(code)
@@ -368,11 +422,9 @@ def parseargs(args):
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
-    with open("languages.txt") as f:
-        accepted_languages = []
-        languages = f.read().splitlines()
-        for language in languages:
-            accepted_languages += language.split(" ")
+    accepted_languages = []
+    for langs in LANGUAGES:
+        accepted_languages += langs
 
     parser.add_argument("--version", help="Print version and exit", action="store_true")
     parser.add_argument(
